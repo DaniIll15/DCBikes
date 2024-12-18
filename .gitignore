@@ -48,3 +48,8 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# LaTeX Files
+*.log
+*.pdf
+*.rmd
