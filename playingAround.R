@@ -148,3 +148,35 @@ spaitalNB <- function(formula, data, coordMat2) {
 
 coordFrame23 <- coordFrame[year == 2023]
 
+## Test Duration Vec
+summerBikes <- bikeRentals[year(started_at) == 2023 & yday(started_at) >= 149 & yday(started_at) <= 247][order(started_at)]
+summerBikes$tripDuration <- difftime(summerBikes$ended_at, summerBikes$started_at, units = "min") %>% as.numeric()
+summerBikes <- summerBikes[tripDuration >= 0]
+
+weatherFrame <- as.data.table(weatherFrame)
+summerWeather <- weatherFrame[year(datetime) == 2023 & yday(datetime) >= 149 & yday(datetime) <= 247]
+weatherVars <- c(2, 3, 4, 5, 6, 8:14, 17:22, 25, 27:29)
+summerWeather <- summerWeather[, ..weatherVars]
+summerWeather$sunrise <- hour(summerWeather$sunrise)
+summerWeather$sunset <- hour(summerWeather$sunset)
+
+weatherGen <- function() {
+  
+  weatherMat <- matrix(0, nrow = nrow(summerBikes), 
+                       ncol = length(weatherVars[-1]))
+  for (i in 1:nrow(summerBikes)) {
+    
+    daySelect <- which(summerBikes$started_at[i] == yday(summerWeather$datetime))
+    weatherMat[i, ] <- as.numeric(summerWeather[daySelect, -1])
+    
+  }
+  names(weatherMat) <- names(summerWeather)[-1]
+  return(weatherMat)
+  
+}
+newVars <- weatherGen()
+
+which(yday(summerBikes$started_at[1]) == yday(summerWeather$datetime))
+
+
+plot(density(summerBikes$tripDuration), xlim = c(0, 300))
